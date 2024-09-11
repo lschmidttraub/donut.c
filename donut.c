@@ -6,9 +6,9 @@
 // The viewer is located at the origin of the space, and the camera looks down the z axis (towards the negative values). 
 // That way, the xy plane in 3d space aligns with the display?s xy coordinates.
 const float R1=2, R2=1.25; //large and small radius of donut
-const float ptDensity=30;
+const float ptDensity=50;
 const int P1=R1*ptDensity, P2=R2*ptDensity; //number of points on each dimension of the surface
-const float D=(R1+R2)*2; //distance from viewer
+const float D=(R1+R2)*3; //distance from viewer
 
 // Projection and display parameters
 const float zN=1, zF=D+R1+R2; //clipping distances for matrix projection
@@ -36,17 +36,19 @@ void renderFrame(float xRot, float yRot) // rotates donut around x and then arou
 			float x=(cos(yRot)*cos(theta)-sin(yRot)*sin(xRot)*sin(theta))*(R1+cos(phi)*R2)+sin(yRot)*cos(xRot)*sin(phi)*R2;
 			float y=cos(xRot)*sin(theta)*(R1+cos(phi)*R2)+sin(xRot)*sin(phi)*R2;
 			float z=cos(yRot)*cos(xRot)*sin(phi)*R2-(cos(yRot)*sin(xRot)*sin(theta)+sin(yRot)*cos(theta))*(R1+cos(phi)*R2)-D;
-			// The normal vector is just the spherical coordinates of the corresponding angles and thus has norm 1
-			float norm[3] = {cos(theta)*cos(phi),sin(theta)*cos(phi),sin(phi)};
+			// The normal vector is just the spherical coordinates of the corresponding angles (rotated around the x and y axes) and thus has norm 1
+			float norm[3] = {cos(yRot)*cos(theta)*cos(phi)+sin(yRot)*(cos(xRot)*sin(phi)-sin(xRot)*sin(theta)*cos(phi))
+					,cos(xRot)*sin(theta)*cos(phi)+sin(xRot)*sin(phi)
+					,cos(yRot)*(cos(xRot)*sin(phi)-sin(xRot)*sin(theta)*cos(phi))-sin(yRot)*cos(theta)*cos(phi)};
 
 			// Calculate brightness (rounded down)
 			// The cross product has to be reset to a (0,1) interval and then to a (0, maxL) interval
 			int L = (lVec[0]*norm[0]+lVec[1]*norm[1]+lVec[2]*norm[2]+1)/2*maxL-0.5; // the 0.5 value is to avoid oversaturation and a having brightness out of range 
-			
+
 			// Map to display
 			// The x coordinates are first scaled to fit in a (-W, +W) range, then normalised to (0,W). Same goes for y and H 
 			int xd=(x*zN/z*resolution+W)/2, yd=(y*zN/z*resolution+H)/2;
-			if(xd>0 && xd<H && yd>0 && yd<W && z>depth[xd][yd]){// only display if in range and if there isn't another pixel closer to the camera.
+			if(xd>0 && xd<H && yd>0 && yd<W && z>depth[yd][xd]){// only display if in range and if there isn't another pixel closer to the camera.
 				display[yd][xd]=lightScale[L];
 				depth[yd][xd]=z;
 			}
@@ -65,8 +67,8 @@ int main()
 {
 	float xRot=0, yRot=0;
 	while(1){
-		xRot+=0.02;
-		yRot+=0.04;
+		xRot+=0.07;
+		yRot+=0.1;
 		renderFrame(xRot,yRot);
 	}
 }
