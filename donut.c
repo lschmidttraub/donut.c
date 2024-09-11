@@ -8,7 +8,7 @@
 const float R1=2, R2=1.25; //large and small radius of donut
 const float ptDensity=50;
 const int P1=R1*ptDensity, P2=R2*ptDensity; //number of points on each dimension of the surface
-const float D=(R1+R2)*3; //distance from viewer
+const float D=(R1+R2)*2; //distance from viewer
 
 // Projection and display parameters
 const float zN=1, zF=D+R1+R2; //clipping distances for matrix projection
